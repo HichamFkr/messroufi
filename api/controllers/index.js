@@ -1,4 +1,7 @@
-const User = require('../models/user')
+const mongoose = require('mongoose')
+const UserSchema = require('../models/user')
+const User = mongoose.model('users', UserSchema)  
+
 
 const signUp = async (req, res)=>{
     var user = new User({
@@ -10,12 +13,28 @@ const signUp = async (req, res)=>{
     return res.send({user: user})
 }
 
-const logIn = async (req, res)=>{
-    var user = await User.findOne({pseudo : req.body.pseudo})
+const signIn = async (req, res)=>{
+    console.log("req  "+req.body.password)
+    var user = await User.findOne({pseudo: req.body.pseudo}, (err, user)=>{
+        return res.send("****** "+user)
+    })
 
-    if(user.password === req.body.password){
-        return res.send("sucess"+user.pseudo)
-    }
+   
+    // if(user.password === req.body.password && user.pseudo === req.body.pseudo){
+    //     return res.send("sucess__ "+req.body.pseudo)
+    // }
 }
 
-module.exports = {signUp}
+const get_users = (req, res)=>{
+    User.find({}, function(err, users) {
+        var userMap = {};
+    
+        users.forEach(function(user) {
+          userMap[user._id] = user;
+        });
+    
+        res.send(userMap);  
+      })
+}
+
+module.exports = {signUp, signIn, get_users}
