@@ -1,25 +1,42 @@
 const mongoose = require('mongoose')
+const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 const UserSchemaFile = require('../models/user')
 const User = mongoose.model('users', UserSchemaFile.UserSchema)  
 
 
 const signUp = async (req, res)=>{
-    const newUser = new User(req.body)
-    //console.log('newUSer '+newUser)
-    newUser.save((err, user)=>{
-        if (err) res.send(err)
-        res.json(user)
+
+    const newUSer = new User ({
+        pseudo: req.body.pseudo,
+        email: req.body.email,
+        password: bcrypt.hashSync(req.body.password, 8)
     })
-    //console.log('newUSer '+newUser)
+
+    newUSer.save((err, user)=>{
+        if (err) return res.status(500).send("Error of registration")
+        res.send(user)
+    })
+
 }
 
 const signIn = async (req, res)=>{
-    var user = await User.findOne({pseudo: req.body.pseudo}, (err, user)=>{
-        if(user.password === req.body.password && user.pseudo === req.body.pseudo){
-                return res.send("Welcome "+req.body.pseudo)
+    const user = await User.findOne({pseudo: req.body.pseudo}, (err, user)=>{
+        if (err) {
+            res.status(500).send('Internal server error')
+        }else{
+            if(user){
+                if(bcrypt.compareSync(req.body.password, user.password) && (req.body.pseudo === user.pseudo)){
+                    res.status(200).send(user.pseudo)
+                }else{
+                    res.status(401).send("please check your pseudo or password ")
+                }
+            }
+            else{
+                res.send("user npt found")
+            }
         }
     })
-    
 }
 
 const get_users = (req, res)=>{
