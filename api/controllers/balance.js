@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 const balanceSchemaFile = require('../models/balance')
-const Balance = mongoose.model('montants', balanceSchemaFile.balanceSchema)
+const Balance = mongoose.model('balance', balanceSchemaFile.balanceSchema)
 
 const addIncome = (req, res)=>{
     const balance = new Balance({

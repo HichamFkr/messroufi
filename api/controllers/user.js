@@ -1,8 +1,13 @@
 const mongoose = require('mongoose')
+
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+
 const UserSchemaFile = require('../models/user')
 const User = mongoose.model('users', UserSchemaFile.UserSchema)  
+
+const BalanceSchemafFile = require('../models/balance')
+const Balance = mongoose.model('balances', BalanceSchemafFile.balanceSchema)
 
 
 const signUp = async (req, res)=>{
@@ -51,4 +56,21 @@ const get_users = (req, res)=>{
       })
 }
 
-module.exports = {signUp, signIn, get_users}
+const addUserBalance = async (req, res)=>{
+    //get user 
+    const {userId} = req.params
+    const user = await User.findById(userId)
+    //create new balance
+    const newBalance = new Balance(req.body)
+    //assign the user as an owner
+    newBalance.user = user
+    // //save the balance
+    await newBalance.save()
+    // // add the balance to the user balances array 'balances'
+    user.balances.push(newBalance)
+    // //save the user 
+    await user.save()
+    return res.status(200).json(newBalance)
+}
+
+module.exports = {signUp, signIn, get_users, addUserBalance}
