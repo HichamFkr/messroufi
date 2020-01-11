@@ -7,6 +7,10 @@ const balanceSchema = new Schema({
     user : {
         type: Schema.Types.ObjectId,
         ref: 'user'
+    },
+    tags: {
+        type: Schema.Types.ObjectId,
+        ref: 'tag'
     }
 })
 

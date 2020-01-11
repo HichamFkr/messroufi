@@ -70,7 +70,55 @@ const addUserBalance = async (req, res)=>{
     user.balances.push(newBalance)
     // //save the user 
     await user.save()
-    return res.status(200).json(newBalance)
+    return res.status(201).json(newBalance)
 }
 
-module.exports = {signUp, signIn, get_users, addUserBalance}
+const getBalances = async (req, res)=>{
+    const {userId} = req.params
+    const user = await User.findById(userId).populate('balances')
+    res.status(201).json(user.balances)
+}
+
+const getOutcomes = async (req, res)=>{
+    const {userId} = req.params
+    const user = await User.findById(userId).populate('balances')
+    let outcomes = []
+
+    user.balances.forEach((outcome)=>{
+        if (outcome.type == 'd'){
+            console.log(outcome)
+            outcomes.push(outcome)
+        }
+    })
+
+    res.status(201).json(outcomes)
+}
+
+const getIncomes = async (req, res)=>{
+    const {userId} = req.params
+    const user = await User.findById(userId).populate('balances')
+    let incomes = []
+
+    user.balances.forEach((income)=>{
+        if (income.type == 'r'){
+            console.log(income)
+            incomes.push(income)
+        }
+    })
+
+    res.status(201).json(incomes)
+}
+
+const updateUser = async (req, res)=>{
+    const {userId} = req.params
+    const newUSer = req.body
+    const user = await User.findByIdAndUpdate(userId, newUSer)
+    res.send({sucess: true,user: user})
+}
+
+const deleteUser = async (req, res)=>{
+    const {userId} = req.params
+    await User.findByIdAndDelete(userId)
+    res.send({sucess: true})
+}
+module.exports = {signUp, signIn, get_users, addUserBalance, getBalances, getOutcomes, getIncomes, updateUser, deleteUser}
