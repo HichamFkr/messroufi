@@ -27,22 +27,31 @@ const signUp = async (req, res)=>{
 
 const signIn = async (req, res)=>{
     const user = await User.findOne({pseudo: req.body.pseudo}, (err, user)=>{
+        
         if (err) {
             res.status(500).send('Internal server error')
         }else{
             if(user){
                 if(bcrypt.compareSync(req.body.password, user.password) && (req.body.pseudo === user.pseudo)){
-                    res.status(200).send(user.pseudo)
+                    jwt.sign({user: user}, 'secretkey', {expiresIn: '1h'}, (err, token)=>{
+                        res.status(200).json({
+                            token: token,
+                            user: user.pseudo
+                        })
+                    })
+ 
                 }else{
                     res.status(401).send("please check your pseudo or password ")
                 }
             }
             else{
-                res.send("user npt found")
+                res.send("user not found")
             }
         }
     })
 }
+
+
 
 const get_users = (req, res)=>{
     User.find({}, (err, users)=> {
@@ -121,4 +130,20 @@ const deleteUser = async (req, res)=>{
     await User.findByIdAndDelete(userId)
     res.send({sucess: true})
 }
+
+
+function verifyToken (req, res, next){
+    const bearerHeader = req.headers['authorization']
+
+    if (typeof(bearerHeader)!== 'undefined'){
+        const token = bearerHeader.split(' ')[1]
+        req.token = token
+        next()
+    }else{
+        res.status(403).json({
+            msg: 'Forbidden'
+        })
+    }
+}
+
 module.exports = {signUp, signIn, get_users, addUserBalance, getBalances, getOutcomes, getIncomes, updateUser, deleteUser}
