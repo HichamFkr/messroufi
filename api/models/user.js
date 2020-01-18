@@ -8,7 +8,7 @@ const UserSchema = new Schema({
     balances :[
         {
             type: Schema.Types.ObjectId,
-            ref: 'balance'
+            ref: 'balances'
         }
     ]
 })

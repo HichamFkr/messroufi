@@ -53,33 +53,42 @@ const signIn = async (req, res)=>{
 
 
 
-const get_users = (req, res)=>{
-    User.find({}, (err, users)=> {
-        var userMap = {}
-    
-        users.forEach((user) =>{
-          userMap[user._id] = user;
-        });
-    
-        res.send(userMap);  
-      })
+const get_users = async (req, res)=>{
+    const users = await User.find().populate('balances')
+    res.status(201).json(users)
 }
 
+
 const addUserBalance = async (req, res)=>{
-    //get user 
-    const {userId} = req.params
-    const user = await User.findById(userId)
-    //create new balance
-    const newBalance = new Balance(req.body)
-    //assign the user as an owner
-    newBalance.user = user
-    // //save the balance
-    await newBalance.save()
-    // // add the balance to the user balances array 'balances'
-    user.balances.push(newBalance)
-    // //save the user 
-    await user.save()
-    return res.status(201).json(newBalance)
+
+        jwt.verify(req.token, 'secretkey', (err, authData)=>{
+        if (err){
+            res.status(403).json("Forbidden")
+        }else{
+            //get user 
+            // const {userId} = req.params
+            // const user =  User.findById(userId)
+            const user = authData.user
+            //create new balance
+            const newBalance = new Balance(req.body)
+            //assign the user as an owner
+            newBalance.user = user
+           
+            //save the balance
+            newBalance.save()
+            //add the balance to the user balances array 'balances'
+            user.balances.push(newBalance)
+            //save the user 
+            user.save() //=============== PROBLEM in here
+            return res.status(201).json({
+                user,
+                newBalance
+            })
+            
+        }
+    })
+
+
 }
 
 const getBalances = async (req, res)=>{
@@ -146,4 +155,4 @@ function verifyToken (req, res, next){
     }
 }
 
-module.exports = {signUp, signIn, get_users, addUserBalance, getBalances, getOutcomes, getIncomes, updateUser, deleteUser}
+module.exports = {signUp, signIn, get_users, addUserBalance, getBalances, getOutcomes, getIncomes, updateUser, deleteUser, verifyToken}

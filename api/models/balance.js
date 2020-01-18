@@ -6,12 +6,12 @@ const balanceSchema = new Schema({
     type: [String],
     user : {
         type: Schema.Types.ObjectId,
-        ref: 'user'
+        ref: 'users'
     },
-    tags: {
-        type: Schema.Types.ObjectId,
-        ref: 'tag'
-    }
+    // tags: {
+    //     type: Schema.Types.ObjectId,
+    //     ref: 'tag'
+    // }
 })
 
 module.exports = {balanceSchema}
